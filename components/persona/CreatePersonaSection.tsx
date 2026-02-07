@@ -54,7 +54,7 @@ export function CreatePersonaSection({
 
   const fetchMetadata = useCallback(async () => {
     try {
-      const res = await fetch("/api/audio/persona-metadata");
+      const res = await fetch("/api/personas/metadata");
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load metadata");
       setTasks(data.tasks ?? {});
@@ -68,7 +68,7 @@ export function CreatePersonaSection({
 
   const fetchPersonas = useCallback(async () => {
     try {
-      const res = await fetch("/api/audio/personas");
+      const res = await fetch("/api/personas");
       const data = await res.json();
       if (res.ok && Array.isArray(data.personas)) setPersonas(data.personas);
       else setPersonas([]);
@@ -160,7 +160,7 @@ export function CreatePersonaSection({
     setCreating(true);
     setError(null);
     try {
-      const res = await fetch("/api/generate/persona", {
+      const res = await fetch("/api/personas/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

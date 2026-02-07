@@ -137,7 +137,7 @@ export function StyledAudioPlayer({
           max={duration || 100}
           value={currentTime}
           onChange={handleSeek}
-          className="audio-progress h-1.5 min-w-[80px] flex-1 cursor-pointer accent-blue-500"
+          className={`audio-progress h-1.5 min-w-[80px] flex-1 cursor-pointer accent-blue-500${playing ? " audio-playing" : ""}`}
           aria-label="Seek"
         />
         <span className="shrink-0 text-xs tabular-nums text-gray-500">

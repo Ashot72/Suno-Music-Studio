@@ -64,9 +64,9 @@ Vocal Gender: Male
 
 Model: V5
 
-Style Weight: 0.85 High obedience to ensure the synths are heavy and the drums are electronic.
+Style Weight: 0.90 
+Weirdness: 0.55 
+Audio Weight: 0 
 
-Weirdness: 045 Slightly higher to allow for cool "glitch" sounds and digital artifacts.
-
-Audio Weight: 0 Since you are not using a persona, leave this empty to let the AI create a new voice.
-
+Persona Description: 
+A cold, breathy male vocal with a mid-low register and subtle robotic texture. Controlled, rhythmic delivery with restrained emotion, enhanced by light distortion and digital effects for a dystopian cyberpunk feel.

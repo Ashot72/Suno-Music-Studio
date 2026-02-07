@@ -52,6 +52,8 @@ type GenerateFormProps = {
   setStatusState: (state: StatusState) => void;
   /** When set, fetch this generation from the database and populate the form. */
   loadTaskId?: string | null;
+  /** Increment to reset the form to defaults. */
+  resetKey?: number;
 };
 
 function clampStep(v: number, delta: number): number {
@@ -69,7 +71,7 @@ const MinusIcon = () => (
   </svg>
 );
 
-export function GenerateForm({ statusState, setStatusState, loadTaskId }: GenerateFormProps) {
+export function GenerateForm({ statusState, setStatusState, loadTaskId, resetKey = 0 }: GenerateFormProps) {
   const [prompt, setPrompt] = useState(DEFAULTS.prompt);
   const [customMode, setCustomMode] = useState(DEFAULTS.customMode);
   const [instrumental, setInstrumental] = useState(DEFAULTS.instrumental);
@@ -88,7 +90,7 @@ export function GenerateForm({ statusState, setStatusState, loadTaskId }: Genera
 
   const fetchPersonas = useCallback(async () => {
     try {
-      const res = await fetch("/api/audio/personas");
+      const res = await fetch("/api/personas");
       const data = await res.json();
       if (res.ok && Array.isArray(data.personas)) setPersonas(data.personas);
       else setPersonas([]);
@@ -106,6 +108,22 @@ export function GenerateForm({ statusState, setStatusState, loadTaskId }: Genera
     window.addEventListener("persona-created", onCreated);
     return () => window.removeEventListener("persona-created", onCreated);
   }, [fetchPersonas]);
+
+  useEffect(() => {
+    if (resetKey === 0) return;
+    setPrompt(DEFAULTS.prompt);
+    setCustomMode(DEFAULTS.customMode);
+    setInstrumental(DEFAULTS.instrumental);
+    setModel(DEFAULTS.model);
+    setStyle(DEFAULTS.style);
+    setTitle(DEFAULTS.title);
+    setNegativeTags(DEFAULTS.negativeTags);
+    setVocalGender(DEFAULTS.vocalGender);
+    setSelectedPersonaId("");
+    setStyleWeight(DEFAULTS.styleWeight);
+    setWeirdnessConstraint(DEFAULTS.weirdnessConstraint);
+    setAudioWeight(DEFAULTS.audioWeight);
+  }, [resetKey]);
 
   useEffect(() => {
     if (!loadTaskId?.trim()) return;
@@ -472,7 +490,7 @@ export function GenerateForm({ statusState, setStatusState, loadTaskId }: Genera
                   className={SELECT_CLASS}
                   aria-label="Select persona for vocals"
                 >
-                  <option value="">No persona (default voice)</option>
+                  <option value="">No persona</option>
                   {personas.map((p) => (
                     <option key={p.personaId} value={p.personaId}>
                       {p.name}

@@ -6,6 +6,9 @@ The app manages tracks with MongoDB and server-hosted audio files, supports sear
 
 We are going to add more features later, including a web-based music app that will allow users to generate, extend, and customize music, create personas, produce covers, generate music videos, and manage tracks with advanced creative controls. A dashboard will let users organize and share their creations.
 
+#### 🎤 Generating Persona
+We implemented persona generation in KIE.ai to give vocal tracks a unique musical identity. A persona defines the performer’s voice, tone, emotion, and delivery, as well as the overall style, mood, and instrumentation. Personas allow you to generate new tracks that feel like they belong to the same musical world, even if the vocals differ. Only vocal tracks can be used to create a persona, and each persona can be saved, edited, and reused for consistent music generation.
+
 #### 👉 Links & Resources
 
 - [Suno](https://suno.com/)  
@@ -38,7 +41,7 @@ npm run dev
 
 - Open the **Run** view (`View → Run` or `Ctrl+Shift+D`) to access the debug configuration
 
-📺 **Video:** [Watch on YouTube](https://youtu.be/NrE-OgeP3vw) 
-
+📺 **Video:(Music Generation)** [Watch on YouTube](https://youtu.be/NrE-OgeP3vw) 
+📺 **Video:(Persona Generation)** [Watch on YouTube](https://youtu.be/x_RFbRAQIIY) 
 
 

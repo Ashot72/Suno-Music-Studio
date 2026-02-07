@@ -1,0 +1,57 @@
+Title: Concrete Echoes
+
+Prompt:
+
+[Intro: Slow, distorted sub-bass pulse, distant industrial reverb, low vinyl crackle]
+[Spoken: Cold, restrained voice, slightly filtered]
+No sirens tonight…
+Just the echo of the city breathing.
+
+[Verse 1: Low, breathy spoken-rhythmic delivery, controlled and detached]
+Footsteps fading in the tunnels below
+Neon’s gone, but the signal still glows
+Concrete walls hold memories tight
+Every word etched in static and light
+I don’t rush, I don’t chase the sound
+I move slow where the echoes are found
+
+[Chorus: Minimal, hypnotic, emotionally restrained]
+These streets remember my name
+Even when the data’s erased
+I don’t scream, I don’t break
+I remain
+
+[Verse 2: Slightly more intensity, subtle distortion grows]
+Old codes humming in abandoned lines
+Truth buried deep in corrupted signs
+They built the cage, they sold the lie
+But I watch the system rust in real time
+
+[Instrumental Break: Sparse analog pad, low industrial hits, filtered noise]
+
+[Bridge: Whispered, intimate]
+They thought silence was control…
+But silence is where I survive.
+
+[Final Chorus: Wider, heavier low-end, same calm delivery]
+These streets remember my name
+Even when the data’s erased
+I don’t scream, I don’t break
+I remain
+
+[Outro: Fading tape hiss, low synth drone]
+Still connected…
+Still here…
+
+[End]
+
+Style: Minimal Industrial Dark Ambient Hip-Hop with sparse drums, sub-bass, analog pads, and urban nocturnal textures.
+
+Negative Tags: Pop, EDM, House, Techno, Trap, Drill, Rock, Metal, Jazz, Reggae, Disco, Acoustic, Guitar, Piano, Bright synths, Happy, Uplifting, Fast, Melodic singing, Warm, Organic
+
+Model: V5
+
+Style Weight: 0.65 
+Weirdness: 0:65
+Audio Weight: 0.30
+

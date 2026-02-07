@@ -99,19 +99,23 @@ type SavedTracksListProps = {
   onSelectLoadFormFilename?: (filename: string | null) => void;
   /** When true, show a search input that filters tracks by generation fields (prompt, style, title, etc.). */
   showSearch?: boolean;
+  /** Called when user clicks "New Generation" — resets form, pauses all audio, scrolls to form. */
+  onNewGeneration?: () => void;
 };
 
-/** When showSelection is true, only include files whose track in persona-metadata has an id (exclude instrumental). */
-function filterFilesWithPersonaId(
+/** When showSelection is true, only include vocal files (exclude instrumental tracks). */
+function filterVocalTracks(
   files: string[],
   tasks: Record<string, PersonaTaskMeta> | null
 ): string[] {
-  if (!tasks) return files;
+  if (!tasks) return [];
   return files.filter((filename) => {
     const parsed = parseSavedFilename(filename);
     if (!parsed) return false;
     const task = tasks[parsed.taskId];
-    const track = task?.tracks?.[parsed.index - 1];
+    if (!task) return false;
+    if (task.instrumental === true) return false;
+    const track = task.tracks?.[parsed.index - 1];
     return Boolean(track?.id);
   });
 }
@@ -157,6 +161,7 @@ export function SavedTracksList({
   selectedLoadFormFilename = null,
   onSelectLoadFormFilename,
   showSearch = false,
+  onNewGeneration,
 }: SavedTracksListProps) {
   const [savedFiles, setSavedFiles] = useState<string[]>([]);
   const [deletingFilename, setDeletingFilename] = useState<string | null>(null);
@@ -178,7 +183,7 @@ export function SavedTracksList({
   const personasEffective = personasProp ?? [];
 
   const filesToShow = useMemo(
-    () => (showSelection ? filterFilesWithPersonaId(savedFiles, tasksEffective) : savedFiles),
+    () => (showSelection ? filterVocalTracks(savedFiles, tasksEffective) : savedFiles),
     [showSelection, savedFiles, tasksEffective]
   );
   const searchFilteredFiles = useMemo(() => {
@@ -291,20 +296,36 @@ export function SavedTracksList({
 
   return (
     <section ref={sectionRef} className="mb-10 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] p-6">
-      <button
-        type="button"
-        onClick={() => setCollapsed((c) => !c)}
-        className="flex w-full items-center justify-center gap-2 rounded text-lg font-semibold text-gray-200 hover:text-gray-100 focus:outline-none"
-        aria-expanded={!collapsed}
-      >
-        Suno Audio Folder
-        <span
-          className={`inline-block shrink-0 text-gray-500 transition-transform duration-200 ${collapsed ? "" : "rotate-180"}`}
-          aria-hidden
+      <div className="relative flex items-center">
+        <button
+          type="button"
+          onClick={() => setCollapsed((c) => !c)}
+          className="flex flex-1 items-center justify-center gap-2 rounded text-lg font-semibold text-gray-200 hover:text-gray-100 focus:outline-none"
+          aria-expanded={!collapsed}
         >
-          ▼
-        </span>
-      </button>
+          Suno Audio Folder
+          <span
+            className={`inline-block shrink-0 text-gray-500 transition-transform duration-200 ${collapsed ? "" : "rotate-180"}`}
+            aria-hidden
+          >
+            ▼
+          </span>
+        </button>
+        {onNewGeneration && (
+          <button
+            type="button"
+            onClick={onNewGeneration}
+            className="absolute right-0 flex shrink-0 items-center gap-1.5 rounded-lg border border-[#2a2a2a] bg-[#0f0f0f] px-3 py-1.5 text-sm font-medium text-gray-300 transition-colors hover:border-blue-600/50 hover:bg-blue-950/30 hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#1a1a1a]"
+            title="Reset form and start a new generation"
+            aria-label="New Generation"
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            New Generation
+          </button>
+        )}
+      </div>
       <div className={collapsed ? "hidden" : "mt-4"}>
         {showSearch && (
           <div className="mb-4">

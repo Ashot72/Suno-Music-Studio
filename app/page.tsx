@@ -46,6 +46,21 @@ export default function Home() {
   const [personaTasks, setPersonaTasks] = useState<Record<string, PersonaTaskMeta> | null>(null);
   const [personaList, setPersonaList] = useState<SavedPersona[]>([]);
   const [personaDataLoading, setPersonaDataLoading] = useState(false);
+  const [formResetKey, setFormResetKey] = useState(0);
+
+  const handleNewGeneration = useCallback(() => {
+    // Stop all playing audio and reset to start
+    document.querySelectorAll("audio").forEach((el) => {
+      el.pause();
+      el.currentTime = 0;
+    });
+    // Reset form and status
+    setStatusState(null);
+    setLoadFormSelectedFilename(null);
+    setFormResetKey((k) => k + 1);
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   const handlePersonaTrackSelect = useCallback((filename: string | null) => {
     setSelectedViewPersonaId(null);
@@ -61,8 +76,8 @@ export default function Home() {
     setPersonaDataLoading(true);
     try {
       const [metaRes, personasRes] = await Promise.all([
-        fetch("/api/audio/persona-metadata"),
-        fetch("/api/audio/personas"),
+        fetch("/api/personas/metadata"),
+        fetch("/api/personas"),
       ]);
       const metaData = await metaRes.json();
       const personasData = await personasRes.json();
@@ -194,6 +209,7 @@ export default function Home() {
           selectedLoadFormFilename={mode === "generate" ? loadFormSelectedFilename : null}
           onSelectLoadFormFilename={mode === "generate" ? setLoadFormSelectedFilename : undefined}
           showSearch={mode === "generate" || mode === "persona"}
+          onNewGeneration={mode === "generate" ? handleNewGeneration : undefined}
         />
 
         {mode === "persona" && (
@@ -212,6 +228,7 @@ export default function Home() {
               statusState={statusState}
               setStatusState={setStatusState}
               loadTaskId={loadFormSelectedFilename ? parseSavedFilename(loadFormSelectedFilename)?.taskId ?? null : null}
+              resetKey={formResetKey}
             />
             <GenerationStatus statusState={statusState} />
           </>

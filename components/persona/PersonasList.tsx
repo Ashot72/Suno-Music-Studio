@@ -56,8 +56,8 @@ export function PersonasList({
     setLoading(true);
     try {
       const [personasRes, metadataRes] = await Promise.all([
-        fetch("/api/audio/personas"),
-        fetch("/api/audio/persona-metadata"),
+        fetch("/api/personas"),
+        fetch("/api/personas/metadata"),
       ]);
       const personasData = await personasRes.json();
       const metadataData = await metadataRes.json();
@@ -119,7 +119,7 @@ export function PersonasList({
     setPersonaToDelete(null);
     setDeletingPersonaId(personaId);
     try {
-      const res = await fetch(`/api/audio/personas?personaId=${encodeURIComponent(personaId)}`, {
+      const res = await fetch(`/api/personas?personaId=${encodeURIComponent(personaId)}`, {
         method: "DELETE",
       });
       if (res.ok) {
