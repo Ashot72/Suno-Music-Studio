@@ -34,6 +34,7 @@ export async function GET() {
           isAddVocals: true,
           isSeparateVocals: true,
           isMashup: true,
+          coverImages: true,
         },
       });
       for (const g of generations) {
@@ -48,6 +49,7 @@ export async function GET() {
           if (g.isAddVocals) tasks[g.taskId].isAddVocals = true;
           if (g.isSeparateVocals) tasks[g.taskId].isSeparateVocals = true;
           if (g.isMashup) tasks[g.taskId].isMashup = true;
+          if (g.coverImages && g.coverImages.length > 0) tasks[g.taskId].hasCoverImage = true;
         }
       }
     }

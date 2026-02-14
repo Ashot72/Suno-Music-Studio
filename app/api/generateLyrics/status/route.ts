@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   }
 
   const res = await fetch(
-    `${KIE_BASE}/vocal-removal/record-info?taskId=${encodeURIComponent(taskId)}`,
+    `${KIE_BASE}/lyrics/record-info?taskId=${encodeURIComponent(taskId)}`,
     {
       method: "GET",
       headers: {

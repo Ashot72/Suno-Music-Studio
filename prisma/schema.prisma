@@ -64,6 +64,8 @@ model Generation {
   isAddVocals        Boolean? // true when created via Add Vocals
   isSeparateVocals   Boolean? // true when created via Separate Vocals
   isMashup           Boolean? // true when created via Mashup
+  coverTaskId        String?  // kie.ai cover generation task ID
+  coverImages        String[] // local filenames in audio/ (e.g. taskId-cover-1.png)
   createdAt          DateTime @default(now())
   user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   tracks             Track[]

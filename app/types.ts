@@ -56,6 +56,8 @@ export type PersonaTaskMeta = {
   isSeparateVocals?: boolean;
   /** True when the track was created via Mashup. */
   isMashup?: boolean;
+  /** True when a cover image has been generated for this task. */
+  hasCoverImage?: boolean;
   /** ISO date string of when the earliest track in this task was created. */
   createdAt?: string;
 };

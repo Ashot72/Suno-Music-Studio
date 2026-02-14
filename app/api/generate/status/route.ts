@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { parseKieResponse } from "@/lib/api-error";
 
 const KIE_BASE = "https://api.kie.ai/api/v1";
 
@@ -41,24 +42,50 @@ export async function GET(request: NextRequest) {
     }
   );
 
-  const data = await res.json().catch(() => ({}));
+  const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
 
-  if (!res.ok) {
+  const parsed = parseKieResponse(res, data);
+  if (parsed.isError) {
     return NextResponse.json(
-      { error: data.msg || data.error || "KIE API error", code: data.code },
-      { status: res.status >= 400 ? res.status : 502 }
+      { error: parsed.errorMessage, code: parsed.apiCode },
+      { status: parsed.status }
     );
   }
 
-  const status = data?.data?.status ?? data?.status;
-  const tracksFromApi = (data?.data?.tracks ?? data?.tracks) as
-    | { id?: string; audioUrl?: string; title?: string }[]
+  const d = data?.data as Record<string, unknown> | undefined;
+  const response = (d?.response ?? {}) as Record<string, unknown>;
+  const status = (d?.status ?? (d?.response as Record<string, unknown>)?.status ?? data?.status) as
+    | string
     | undefined;
+  const rawTracks =
+    response.sunoData ?? response.suno_data ?? response.data ?? d?.tracks ?? data?.tracks;
+  const tracksFromApi = Array.isArray(rawTracks)
+    ? (rawTracks as { id?: string; audioUrl?: string; title?: string }[])
+    : undefined;
   /** KIE docs: complete = all tracks done; we also accept COMPLETED, SUCCESS */
-  const isCompleted =
+  let isCompleted =
     status === COMPLETED_STATUS ||
     status === SUCCESS_STATUS ||
-    (typeof status === "string" && status.toLowerCase() === "complete");
+    (typeof status === "string" && status.toLowerCase() === "complete") ||
+    (typeof status === "string" && status.toLowerCase() === "success");
+  if (
+    !isCompleted &&
+    Array.isArray(tracksFromApi) &&
+    tracksFromApi.length > 0 &&
+    tracksFromApi.some((t) => typeof t?.audioUrl === "string" && t.audioUrl.length > 0)
+  ) {
+    const trackStatuses = tracksFromApi.map(
+      (t) => (t as Record<string, unknown>)?.status ?? (t as Record<string, unknown>)?.Status ?? ""
+    );
+    const anySuccess = trackStatuses.some(
+      (s) =>
+        s === "SUCCESS" ||
+        s === "COMPLETED" ||
+        String(s).toLowerCase() === "complete" ||
+        String(s).toLowerCase() === "success"
+    );
+    if (anySuccess) isCompleted = true;
+  }
   const isFinal =
     isCompleted ||
     (typeof status === "string" && FAILED_STATUSES.includes(status));

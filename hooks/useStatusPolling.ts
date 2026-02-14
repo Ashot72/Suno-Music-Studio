@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useRef } from "react";
-import { type StatusState, FAILED_STATUSES } from "@/app/types";
-import type { SunoTrack } from "@/app/types";
+import { type StatusState, type SunoTrack, FAILED_STATUSES } from "@/app/types";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 type UseStatusPollingOptions = {
   setStatusState: (state: StatusState) => void;
@@ -35,14 +35,16 @@ export function useStatusPolling({ setStatusState }: UseStatusPollingOptions) {
         const res = await fetch(`/api/generate/status?taskId=${encodeURIComponent(taskId)}`);
         const data = await res.json();
         if (!res.ok) {
-          setError(data.error || "Failed to fetch status");
+          setError(
+            getApiErrorMessage(res, data as Record<string, unknown>, "Failed to fetch status")
+          );
           stopPolling();
           return;
         }
-        const d = data?.data;
-        const status = (d?.status ?? data?.status ?? "PENDING").toString();
-        const response = d?.response ?? {};
-        const rawSuno = response.sunoData ?? response.suno_data ?? response.data;
+        const d = data?.data as Record<string, unknown> | undefined;
+        const response = (d?.response ?? {}) as Record<string, unknown>;
+        const rawSuno =
+          response.sunoData ?? response.suno_data ?? response.data ?? d?.tracks ?? data?.tracks;
         const rawArray = Array.isArray(rawSuno)
           ? rawSuno.filter((t: unknown) => t != null)
           : rawSuno != null
@@ -60,10 +62,34 @@ export function useStatusPolling({ setStatusState }: UseStatusPollingOptions) {
           createTime: t.createTime != null ? String(t.createTime) : undefined,
           duration: typeof t.duration === "number" ? t.duration : undefined,
         }));
+        const resp = d?.response as Record<string, unknown> | undefined;
+        let status = (d?.status ?? resp?.status ?? data?.status ?? "PENDING").toString();
+        if (
+          status === "PENDING" &&
+          tracks.length > 0 &&
+          tracks.some((t) => t.audioUrl && t.audioUrl.length > 0)
+        ) {
+          const trackStatuses = rawArray.map(
+            (t: Record<string, unknown>) => (t?.status ?? t?.Status ?? "").toString()
+          );
+          const allSuccess = trackStatuses.every(
+            (s) =>
+              s === "SUCCESS" ||
+              s === "COMPLETED" ||
+              s?.toLowerCase() === "complete" ||
+              s?.toLowerCase() === "success"
+          );
+          if (allSuccess || trackStatuses.some((s) => s?.toLowerCase() === "success")) {
+            status = "SUCCESS";
+          }
+        }
         const errorMessage =
           d?.errorMessage ?? d?.error_message ?? d?.msg ?? (typeof d?.error === "string" ? d.error : null);
         const isSuccessStatus =
-          status === "SUCCESS" || status === "COMPLETED" || status?.toLowerCase() === "complete";
+          status === "SUCCESS" ||
+          status === "COMPLETED" ||
+          status?.toLowerCase() === "complete" ||
+          status?.toLowerCase() === "success";
         const displayError =
           !isSuccessStatus && errorMessage && typeof errorMessage === "string" ? errorMessage : undefined;
         setStatusState({

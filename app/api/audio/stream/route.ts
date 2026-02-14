@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readFile } from "fs/promises";
 import path from "path";
-import { AUDIO_DIR, isSafeFilename } from "@/lib/audio";
+import { AUDIO_DIR, isSafeFilename, isSafeCoverFilename } from "@/lib/audio";
 
 /** Parse Range header "bytes=start-end" or "bytes=start-". Returns { start, end } or null. */
 function parseRange(rangeHeader: string | null, totalLength: number): { start: number; end: number } | null {
@@ -21,7 +21,7 @@ function parseRange(rangeHeader: string | null, totalLength: number): { start: n
 
 export async function GET(request: NextRequest) {
   const filename = request.nextUrl.searchParams.get("filename");
-  if (!filename || !isSafeFilename(filename)) {
+  if (!filename || (!isSafeFilename(filename) && !isSafeCoverFilename(filename))) {
     return NextResponse.json({ error: "Invalid or missing filename" }, { status: 400 });
   }
 
@@ -30,12 +30,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Invalid path" }, { status: 400 });
   }
 
+  const isCover = filename.endsWith(".png");
+  const contentType = isCover ? "image/png" : "audio/mpeg";
+
   try {
     const buffer = await readFile(filePath);
     const totalLength = buffer.length;
     const range = parseRange(request.headers.get("Range"), totalLength);
     const baseHeaders: Record<string, string> = {
-      "Content-Type": "audio/mpeg",
+      "Content-Type": contentType,
       "Accept-Ranges": "bytes",
     };
 

@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import type { StatusState, SavedPersona } from "@/app/types";
-import { IN_PROGRESS_STATUSES } from "@/app/types";
+import { type StatusState, type SavedPersona, IN_PROGRESS_STATUSES } from "@/app/types";
 import { useStatusPolling } from "@/hooks/useStatusPolling";
 import { useModelHighlight } from "@/hooks/useModelHighlight";
 import { usePersonas } from "@/hooks/usePersonas";

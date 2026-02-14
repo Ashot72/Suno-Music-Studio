@@ -25,12 +25,13 @@ The Add Instrumental feature lets you transform your uploaded vocal or melody in
 The Add Vocals feature lets you generate and layer AI vocals on top of an existing instrumental track. Simply upload your MP3 instrumental, provide a prompt describing the lyrics or mood, and set the title, tags, and weights to customize the result. The generated vocals are created directly on the server, allowing you to instantly listen to the transformation. This is perfect for experimenting with new arrangements, creating duets, or quickly producing professional-sounding tracks without needing a singer.
 
 #### 🎵 Separate Vocals and Instruments
-
 The Separate Vocals feature lets you split any music track into vocals and instrumental tracks. Simply upload your MP3, and the AI generates two clean tracks, one for vocals and one for instruments. You can listen to the original track alongside the separated versions instantly. This is perfect for karaoke, remixes, sample extraction, or exploring unique instrumentals, though sometimes unusual instruments, like the Armenian duduk, may appear in the vocal track due to AI interpretation.
 
 ####  🎵 AI-Generated Music Mashups
-
 The AI-generated mashup feature lets you combine multiple audio tracks into a single, creative mix. Simply provide a prompt, style, and weights, and upload your tracks—either previously generated or any tracks you want. The AI uses the prompt to guide the style and lyrical direction, especially when Custom Mode is off, rather than specifying exact lyrics.
+
+#### 🎵 Get & Generate Song Lyrics + Covers
+Easily get lyrics, create lyrics and cover art for your tracks.
 
 #### 👉 Links & Resources
 
@@ -81,3 +82,5 @@ npm run dev
 📺 **Video:(Extracting Vocals & Instruments)** [Watch on YouTube](https://youtu.be/tKOhS9KrCqo) 
 
 📺 **Video:(Generating Music Mashups)** [Watch on YouTube](https://youtu.be/CtMHrjQKC9c) 
+
+📺 **Video:(Get & Generate Song Lyrics + Covers)** [Watch on YouTube](https://youtu.be/kkwSlLig78Q) 

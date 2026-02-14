@@ -22,12 +22,18 @@ function getStageMessage(status?: string): { label: string; description: string 
 type GenerationProgressProps = {
   isActive: boolean;
   status?: string;
+  /** Override label when provided (e.g. for cover: "Pending", "Generating") */
+  label?: string;
+  /** Override description when provided */
+  description?: string;
 };
 
-export function GenerationProgress({ isActive, status }: GenerationProgressProps) {
+export function GenerationProgress({ isActive, status, label: labelProp, description: descProp }: GenerationProgressProps) {
   if (!isActive) return null;
 
-  const { label, description } = getStageMessage(status);
+  const fromStatus = getStageMessage(status);
+  const label = labelProp ?? fromStatus.label;
+  const description = descProp ?? fromStatus.description;
 
   return (
     <section className="mb-10 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] p-6">

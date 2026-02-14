@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import type { StatusState } from "@/app/types";
-import { IN_PROGRESS_STATUSES } from "@/app/types";
+import { type StatusState, IN_PROGRESS_STATUSES } from "@/app/types";
 import { useStatusPolling } from "@/hooks/useStatusPolling";
 
 /** Model options for Add Vocals (API supports V4_5PLUS and V5 only). */

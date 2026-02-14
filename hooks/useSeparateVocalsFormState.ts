@@ -1,8 +1,7 @@
 "use client";
 
 import { useCallback, useRef } from "react";
-import type { StatusState, SunoTrack } from "@/app/types";
-import { FAILED_STATUSES } from "@/app/types";
+import { type StatusState, type SunoTrack, FAILED_STATUSES } from "@/app/types";
 
 type UseSeparateVocalsFormStateOptions = {
   setStatusState: (state: StatusState) => void;

@@ -13,11 +13,14 @@ import { AddInstrumentalSection } from "@/components/addInstrumental/AddInstrume
 import { AddVocalsSection } from "@/components/addVocals/AddVocalsSection";
 import { SeparateVocalsSection } from "@/components/separateVocals/SeparateVocalsSection";
 import { MashupSection } from "@/components/mashup/MashupSection";
+import { GetLyricsSection } from "@/components/getLyrics/GetLyricsSection";
+import { GenerateLyricsSection } from "@/components/generateLyrics/GenerateLyricsSection";
+import { GenerateCoverSection } from "@/components/generateCover/GenerateCoverSection";
 import { CreatePersonaSection } from "@/components/persona/CreatePersonaSection";
 import { PersonasList } from "@/components/persona/PersonasList";
 import { AppTitleWithLogo } from "@/components/shared/AppTitle";
 
-export type AppMode = "generate" | "mashup" | "extend" | "uploadExtend" | "uploadCover" | "addInstrumental" | "addVocals" | "separateVocals" | "persona";
+export type AppMode = "generate" | "mashup" | "extend" | "uploadExtend" | "uploadCover" | "addInstrumental" | "addVocals" | "separateVocals" | "persona" | "getLyrics" | "generateLyrics" | "generateCover";
 
 const MODE_OPTIONS: { value: AppMode; label: string }[] = [
   { value: "generate", label: "Generate Music" },
@@ -29,6 +32,9 @@ const MODE_OPTIONS: { value: AppMode; label: string }[] = [
   { value: "separateVocals", label: "Separate Vocals" },
   { value: "persona", label: "Generate Persona" },
   { value: "mashup", label: "Mashup" },
+  { value: "getLyrics", label: "Get Lyrics" },
+  { value: "generateLyrics", label: "Generate Lyrics" },
+  { value: "generateCover", label: "Generate Cover" },
 ];
 
 const MODE_STORAGE_KEY = "suno-mode";
@@ -129,10 +135,11 @@ export default function Home() {
 
   const extendAudioId = resolveAudioId(mode === "extend" ? selectedAudioFilename : null);
   const separateVocalsAudioId = resolveAudioId(mode === "separateVocals" ? selectedAudioFilename : null);
+  const getLyricsAudioId = resolveAudioId(mode === "getLyrics" ? selectedAudioFilename : null);
 
-  // Resolve display name for selected track (upload-extend, upload-cover, add-instrumental, add-vocals, separate-vocals)
+  // Resolve display name for selected track (upload-extend, upload-cover, add-instrumental, add-vocals, separate-vocals, get-lyrics, generate-cover)
   const selectedTrackDisplayName =
-    (mode === "uploadExtend" || mode === "uploadCover" || mode === "addInstrumental" || mode === "addVocals" || mode === "separateVocals") &&
+    (mode === "uploadExtend" || mode === "uploadCover" || mode === "addInstrumental" || mode === "addVocals" || mode === "separateVocals" || mode === "getLyrics" || mode === "generateCover") &&
     selectedAudioFilename
       ? parseSavedFilename(selectedAudioFilename)?.title ?? selectedAudioFilename
       : null;
@@ -198,11 +205,14 @@ export default function Home() {
   useEffect(() => {
     const onPersonaCreated = () => fetchPersonaData();
     const onAudioSaved = () => fetchPersonaData();
+    const onCoverGenerated = () => fetchPersonaData();
     window.addEventListener("persona-created", onPersonaCreated);
     window.addEventListener("audio-saved", onAudioSaved);
+    window.addEventListener("cover-generated", onCoverGenerated);
     return () => {
       window.removeEventListener("persona-created", onPersonaCreated);
       window.removeEventListener("audio-saved", onAudioSaved);
+      window.removeEventListener("cover-generated", onCoverGenerated);
     };
   }, [fetchPersonaData]);
 
@@ -286,14 +296,17 @@ export default function Home() {
                       : mode === "addVocals" ? "addVocals"
                         : mode === "separateVocals" ? "separateVocals"
                           : mode === "mashup" ? "mashup"
-                            : undefined
+                            : mode === "getLyrics" ? "getLyrics"
+                              : mode === "generateLyrics" ? "generateLyrics"
+                              : mode === "generateCover" ? "generateCover"
+                              : undefined
           }
           personaMetadata={personaTasks}
           personas={personaList}
           showLoadFormRadio={mode === "generate"}
           selectedLoadFormFilename={mode === "generate" ? loadFormSelectedFilename : null}
           onSelectLoadFormFilename={mode === "generate" ? setLoadFormSelectedFilename : undefined}
-          showSearch={mode === "generate" || mode === "mashup" || mode === "persona" || mode === "extend" || mode === "uploadExtend" || mode === "uploadCover" || mode === "addInstrumental" || mode === "addVocals" || mode === "separateVocals"}
+          showSearch={mode === "generate" || mode === "mashup" || mode === "persona" || mode === "extend" || mode === "uploadExtend" || mode === "uploadCover" || mode === "addInstrumental" || mode === "addVocals" || mode === "separateVocals" || mode === "getLyrics" || mode === "generateLyrics" || mode === "generateCover"}
           onNewGeneration={
             mode === "generate"
               ? handleNewGeneration
@@ -407,6 +420,22 @@ export default function Home() {
             onClearSelection={() => setSelectedAudioFilename(null)}
           />
         </div>
+        {mode === "getLyrics" && (
+          <GetLyricsSection
+            selectedTrackFilename={selectedAudioFilename}
+            selectedTrackName={selectedTrackDisplayName}
+            selectedAudioId={getLyricsAudioId}
+            onClearSelection={() => setSelectedAudioFilename(null)}
+          />
+        )}
+        {mode === "generateLyrics" && <GenerateLyricsSection />}
+        {mode === "generateCover" && (
+          <GenerateCoverSection
+            selectedTrackFilename={selectedAudioFilename}
+            selectedTrackName={selectedTrackDisplayName}
+            onClearSelection={() => setSelectedAudioFilename(null)}
+          />
+        )}
         {mode === "persona" && (
           <CreatePersonaSection
             selectedAudioFilename={selectedAudioFilename}

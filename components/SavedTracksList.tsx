@@ -108,9 +108,12 @@ type SavedTracksListProps = {
    * - "addVocals": same as addInstrumental (select track as source)
    * - "separateVocals": tracks with vocals (audioId), for stem separation
    * - "mashup": show all tracks with select buttons (no delete)
+   * - "getLyrics": vocal tracks only, no 14-day filter, for timestamped lyrics
+   * - "generateLyrics": all tracks, no 14-day filter, no select/delete buttons (read-only list)
+   * - "generateCover": all tracks with metadata, select track to generate cover image
    * - undefined: normal mode with delete buttons
    */
-  selectionMode?: "persona" | "extend" | "uploadExtend" | "uploadCover" | "addInstrumental" | "addVocals" | "separateVocals" | "mashup";
+  selectionMode?: "persona" | "extend" | "uploadExtend" | "uploadCover" | "addInstrumental" | "addVocals" | "separateVocals" | "mashup" | "getLyrics" | "generateLyrics" | "generateCover";
   /** When provided (e.g. from page), used instead of fetching; avoids duplicate requests. */
   personaMetadata?: Record<string, PersonaTaskMeta> | null;
   personas?: SavedPersona[];
@@ -198,6 +201,23 @@ function filterSeparateVocalsTracks(
   });
 }
 
+/** For getLyrics mode, show vocal tracks with metadata and audioId. No 14-day filter. Instrumental excluded. */
+function filterGetLyricsTracks(
+  files: string[],
+  tasks: Record<string, PersonaTaskMeta> | null
+): string[] {
+  if (!tasks || Object.keys(tasks).length === 0) return files;
+  return files.filter((filename) => {
+    const parsed = parseSavedFilename(filename);
+    if (!parsed) return false;
+    const task = tasks[parsed.taskId];
+    if (!task) return false;
+    if (task.instrumental === true) return false;
+    const track = task.tracks?.[parsed.index - 1];
+    return Boolean(track?.id);
+  });
+}
+
 /** True if this filename's track (taskId + audioId from metadata) already has a persona. */
 function trackHasPersona(
   filename: string,
@@ -247,6 +267,10 @@ function isSeparateVocalsTrack(filename: string, tasks: Record<string, PersonaTa
 
 function isMashupTrack(filename: string, tasks: Record<string, PersonaTaskMeta> | null): boolean {
   return getTask(filename, tasks)?.isMashup === true;
+}
+
+function hasCoverImage(filename: string, tasks: Record<string, PersonaTaskMeta> | null): boolean {
+  return getTask(filename, tasks)?.hasCoverImage === true;
 }
 
 function isExpiredTrack(filename: string, tasks: Record<string, PersonaTaskMeta> | null): boolean {
@@ -306,20 +330,27 @@ export function SavedTracksList({
   const isAddVocalsMode = selectionMode === "addVocals";
   const isSeparateVocalsMode = selectionMode === "separateVocals";
   const isMashupMode = selectionMode === "mashup";
+  const isGetLyricsMode = selectionMode === "getLyrics";
+  const isGenerateLyricsMode = selectionMode === "generateLyrics";
+  const isGenerateCoverMode = selectionMode === "generateCover";
   const filesToShow = useMemo(
     () =>
       isPersonaMode
         ? filterVocalTracks(savedFiles, tasksEffective)
         : isSeparateVocalsMode
           ? filterSeparateVocalsTracks(savedFiles, tasksEffective)
-          : isMashupMode
-            ? savedFiles
-            : isUploadExtendMode || isUploadCoverMode || isAddInstrumentalMode || isAddVocalsMode
+          : isGetLyricsMode
+            ? filterGetLyricsTracks(savedFiles, tasksEffective)
+            : isGenerateLyricsMode
               ? filterAllTracks(savedFiles, tasksEffective)
-              : isExtendMode
-                ? filterRecentTracks(savedFiles, tasksEffective)
-                : savedFiles,
-    [isPersonaMode, isSeparateVocalsMode, isMashupMode, isUploadExtendMode, isUploadCoverMode, isAddInstrumentalMode, isAddVocalsMode, isExtendMode, savedFiles, tasksEffective]
+              : isMashupMode || isGenerateCoverMode
+              ? savedFiles
+              : isUploadExtendMode || isUploadCoverMode || isAddInstrumentalMode || isAddVocalsMode
+                ? filterAllTracks(savedFiles, tasksEffective)
+                : isExtendMode
+                  ? filterRecentTracks(savedFiles, tasksEffective)
+                  : savedFiles,
+    [isPersonaMode, isSeparateVocalsMode, isGetLyricsMode, isGenerateLyricsMode, isMashupMode, isUploadExtendMode, isUploadCoverMode, isAddInstrumentalMode, isAddVocalsMode, isGenerateCoverMode, isExtendMode, savedFiles, tasksEffective]
   );
   const searchFilteredFiles = useMemo(() => {
     if (searchTaskIds === null) return filesToShow;
@@ -523,7 +554,13 @@ export function SavedTracksList({
                         ? "No tracks to add vocals to."
                         : isMashupMode
                           ? "No tracks to select."
-                          : isExtendMode
+                          : isGetLyricsMode
+                            ? "No vocal tracks to get lyrics for."
+                            : isGenerateLyricsMode
+                              ? "No tracks."
+                              : isGenerateCoverMode
+                                ? "No tracks to generate cover for."
+                                : isExtendMode
                             ? "No tracks to extend. Only tracks from the last 14 days can be extended."
                             : "No saved tracks yet. Generate music and use Download to save files."}
           </p>
@@ -583,6 +620,7 @@ export function SavedTracksList({
                     const addVocals = isAddVocalsTrack(filename, tasksEffective);
                     const separateVocals = isSeparateVocalsTrack(filename, tasksEffective);
                     const mashup = isMashupTrack(filename, tasksEffective);
+                    const coverGenerated = hasCoverImage(filename, tasksEffective);
                     const expired = (isUploadExtendMode || isUploadCoverMode || isAddInstrumentalMode || isAddVocalsMode || isSeparateVocalsMode || isMashupMode) && isExpiredTrack(filename, tasksEffective);
                     return (
                       <li
@@ -690,6 +728,17 @@ export function SavedTracksList({
                               </svg>
                             </span>
                           )}
+                          {coverGenerated && (
+                            <span
+                              className="inline-flex shrink-0 text-emerald-400"
+                              title="Cover generated"
+                              aria-label="Cover generated"
+                            >
+                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                            </span>
+                          )}
                           {expired && (
                             <span
                               className="inline-flex shrink-0 text-red-400"
@@ -710,7 +759,7 @@ export function SavedTracksList({
                         downloadFilename={filename}
                         aria-label={`Play ${parsed?.title ?? filename}`}
                       />
-                      {showSelection ? (
+                      {isGenerateLyricsMode ? null : showSelection ? (
                         isPersonaMode && trackHasPersona(filename, tasksEffective, personasEffective) ? (
                           <span
                             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[#2a2a2a] bg-[#1a1a1a] text-gray-500 opacity-60"
